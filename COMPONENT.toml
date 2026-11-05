@@ -1,0 +1,6 @@
+[component]
+name = "SigmaOS-mirror"
+tier = 3
+description = "Repository mirror orchestrator, latency prober, and package download redirector"
+contracts = ['mirror-orchestrator', 'latency-probe', 'geo-mirror-selector']
+upstream_inspirations = ['https://github.com/omacom/omarchy-mirror']
