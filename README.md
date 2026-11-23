@@ -1,4 +1,6 @@
-# Omarchy Mirror
+# fk-omarchy-mirror
+
+> Forked from omacom/omarchy-mirror (MIT). See `SIGMAOS_FORK.md`.
 
 Dedicated mirror of Arch core/extra/multilib repositories for Omarchy hosted on Cloudflare R2.
 
