@@ -1,4 +1,4 @@
-# fk-omarchy-mirror
+# SigmaOS mirror
 
 > Forked from AaryanSinghChauhan09/SigmaOS-mirror (MIT). See `SIGMAOS_FORK.md`.
 
@@ -6,50 +6,50 @@ Dedicated mirror of Arch core/extra/multilib repositories for SigmaOS hosted on 
 
 ## Edge, rc and stable
 
-The stable mirror is the default for SigmaOS. It's located at `https://stable-mirror.omarchy.org/`, and it serves the Arch snapshot the current SigmaOS release was tested against. It changes only when a release ships, so new libraries and tools reach everyone after an rc has been tested on them.
+The stable mirror is the default for SigmaOS. It's located at `https://stable-mirror.sigmaos.org/`, and it serves the Arch snapshot the current SigmaOS release was tested against. It changes only when a release ships, so new libraries and tools reach everyone after an rc has been tested on them.
 
-The rc mirror, `https://rc-mirror.omarchy.org/`, holds the snapshot taken when a release candidate is cut. Release candidates are tested against it.
+The rc mirror, `https://rc-mirror.sigmaos.org/`, holds the snapshot taken when a release candidate is cut. Release candidates are tested against it.
 
-The edge mirror tracks the very latest Arch repositories every hour. It's located at `https://mirror.omarchy.org/`. SigmaOS users can switch to this using _Update > Channel > Edge_ in the SigmaOS Menu.
+The edge mirror tracks the very latest Arch repositories every hour. It's located at `https://mirror.sigmaos.org/`. SigmaOS users can switch to this using _Update > Channel > Edge_ in the SigmaOS Menu.
 
 On the mirror host:
 
 ```sh
 # When a feature release candidate is cut: a fresh Arch snapshot for rc
-bin/omarchy-mirror-sync-rc
+bin/sigmaos-mirror-sync-rc
 
 # On release day, before stable packages are promoted: stable gets the rc snapshot as it is
-bin/omarchy-mirror-sync-stable-from-rc
+bin/sigmaos-mirror-sync-stable-from-rc
 ```
 
 Snapshots only move forward, from upstream to rc to stable, and stable never syncs from upstream itself. A patch release candidate leaves the mirrors alone: since the last release, rc and stable serve the same snapshot. The copy to stable refuses to move it to an older snapshot than it serves.
 
-Promote the mirror before the packages. `stable-mirror.omarchy.org/lastsync` matches `rc-mirror.omarchy.org/lastsync` once the copy is up, and only then should stable packages be promoted. Stable packages built against the new snapshot would otherwise reach machines that still get the old one.
+Promote the mirror before the packages. `stable-mirror.sigmaos.org/lastsync` matches `rc-mirror.sigmaos.org/lastsync` once the copy is up, and only then should stable packages be promoted. Stable packages built against the new snapshot would otherwise reach machines that still get the old one.
 
 ## Arch Linux ARM: local HTTP staging
 
-Arch Linux ARM [pushes to its official mirrors](https://archlinuxarm.org/about/mirrors), but their public HTTP repositories can be pulled independently. `bin/omarchy-mirror-stage-arm` stages packages locally using Python 3.9+ and its standard library. It defaults to the [Florida mirror](https://fl.us.mirror.archlinuxarm.org/) over HTTPS. It does not upload to R2, change existing mirror services, or register an official ARM mirror.
+Arch Linux ARM [pushes to its official mirrors](https://archlinuxarm.org/about/mirrors), but their public HTTP repositories can be pulled independently. `bin/sigmaos-mirror-stage-arm` stages packages locally using Python 3.9+ and its standard library. It defaults to the [Florida mirror](https://fl.us.mirror.archlinuxarm.org/) over HTTPS. It does not upload to R2, change existing mirror services, or register an official ARM mirror.
 
 Start by checking the download size:
 
 ```sh
-bin/omarchy-mirror-stage-arm --stage ./stage-arm --dry-run
+bin/sigmaos-mirror-stage-arm --stage ./stage-arm --dry-run
 ```
 
 Then stage the repositories:
 
 ```sh
 # All current aarch64 package repositories: core, extra, alarm, aur
-bin/omarchy-mirror-stage-arm --stage /mnt/arch-arm-mirror
+bin/sigmaos-mirror-stage-arm --stage /mnt/arch-arm-mirror
 
 # Smaller local test: complete repositories, about 1.6 GiB combined
-bin/omarchy-mirror-stage-arm --stage ./stage-arm --repos core alarm aur
+bin/sigmaos-mirror-stage-arm --stage ./stage-arm --repos core alarm aur
 
 # Repeat the same command to verify local packages and download only changes
-bin/omarchy-mirror-stage-arm --stage ./stage-arm --repos core alarm aur
+bin/sigmaos-mirror-stage-arm --stage ./stage-arm --repos core alarm aur
 
 # Both currently published architectures, with optional removal of old packages
-bin/omarchy-mirror-stage-arm --stage /mnt/arch-arm-mirror \
+bin/sigmaos-mirror-stage-arm --stage /mnt/arch-arm-mirror \
   --arch aarch64 --arch armv7h --prune
 ```
 
@@ -62,7 +62,7 @@ Before publishing local metadata, it checks shared `.files` entries against `.db
 Recovery is explicitly for retaining packages while upstream fixes its metadata:
 
 ```sh
-bin/omarchy-mirror-stage-arm --stage ./stage-arm --recover-null-records \
+bin/sigmaos-mirror-stage-arm --stage ./stage-arm --recover-null-records \
   --allow-null-record aarch64/extra/findnewest-0.3-4/desc
 ```
 
@@ -72,7 +72,7 @@ Pruning is off by default. `--prune` removes only obsolete package and signature
 
 Each non-dry run writes a schema-versioned JSON report beside the stage (for example, `stage-arm.status.json`). It records `running`, `failed`, `degraded`, or `complete`, the selected repositories, manifest hashes, counts, and any recovery/omissions. `running` or `failed` never authorizes publication; individual metadata replacements are not transactional and a write failure can leave a mixed tree. Successful runs advance only each selected repository's `aarch64/<repo>/lastsync`. The old root `lastsync` is left untouched for compatibility and must not be used as a readiness signal. A partial run reports only its selected repositories; it does not certify the rest of the stage. `--json` prints the result to stdout, with progress and warnings on stderr. Exit codes: 0 complete or clean dry run; 1 failure; 2 usage; 3 degraded; 130 interrupted.
 
-Treat this directory as a staging tree, not something to serve. Metadata files are replaced individually, so it must not be uploaded during a sync; `omarchy-mirror-upload-arm` (below) holds the stage lock for that reason.
+Treat this directory as a staging tree, not something to serve. Metadata files are replaced individually, so it must not be uploaded during a sync; `sigmaos-mirror-upload-arm` (below) holds the stage lock for that reason.
 
 ### Initial upstream inventory (September 5, 2026)
 
@@ -87,36 +87,36 @@ The initial local pull verified 311 `core`, 12,895 `extra`, 75 `alarm`, and 12 `
 
 ### Publishing the ARM mirror to R2
 
-`bin/omarchy-mirror-sync-arm` is the hourly job: it stages `core`, `extra`, `alarm` and `aur` with `omarchy-mirror-stage-arm`, then uploads the stage with `omarchy-mirror-upload-arm`. ARM has its own buckets and hosts, so the x86_64 prune in `omarchy-mirror-upload` cannot reach it:
+`bin/sigmaos-mirror-sync-arm` is the hourly job: it stages `core`, `extra`, `alarm` and `aur` with `sigmaos-mirror-stage-arm`, then uploads the stage with `sigmaos-mirror-upload-arm`. ARM has its own buckets and hosts, so the x86_64 prune in `sigmaos-mirror-upload` cannot reach it:
 
 | Channel | Bucket | Host |
 | --- | --- | --- |
-| edge | `omarchy-mirror-arm` | `arm-mirror.omarchy.org` |
-| rc | `omarchy-mirror-arm-rc` | `arm-rc-mirror.omarchy.org` |
-| stable | `omarchy-mirror-arm-stable` | `arm-stable-mirror.omarchy.org` |
+| edge | `sigmaos-mirror-arm` | `arm-mirror.sigmaos.org` |
+| rc | `sigmaos-mirror-arm-rc` | `arm-rc-mirror.sigmaos.org` |
+| stable | `sigmaos-mirror-arm-stable` | `arm-stable-mirror.sigmaos.org` |
 
-The buckets keep ARM's layout, so the mirror line is `Server = https://arm-stable-mirror.omarchy.org/$arch/$repo`.
+The buckets keep ARM's layout, so the mirror line is `Server = https://arm-stable-mirror.sigmaos.org/$arch/$repo`.
 
 Two options on the stager make it fit for unattended use:
 
 - `--keyring FILE` checks every package against a gpgv keyring before it is staged, using the signature the database carries. Arch Linux ARM signs every package with one build key (`68B3537F39A313B3E574D06777193F152BDBE6A6`) and does not sign its databases, so this is the only check that ties a package to its builder. A package that does not verify fails the run and is not retried. Verified packages are recorded by content and keyring beside the stage (`STAGE.verified.json`), so a package staged before the keyring was given, or under another keyring, is checked on the next run and an unchanged one is not checked twice.
 - `--publish-degraded` publishes upstream's databases unchanged when `--recover-null-records` was needed. The all-NUL record described above has been in `extra` since at least September 5, 2026, and every Arch Linux ARM mirror serves it; without this option the stage could never publish `extra`. The exception stays explicit: `config/arm-allow-null-records` lists the known records, and a new one fails the run until it is added.
 
-`omarchy-mirror-upload-arm` uploads packages and signatures first, then the databases, then prunes what the stage no longer holds. It holds the stage lock throughout and refuses a stage whose last run was not `complete`, did not check signatures, or did not cover every repository in the tree. Databases are compared by checksum. Packages from the local stage are compared by time against the time R2 received its copy, which costs nothing beyond the listing; that would miss a same-name replacement stamped older than its upload, so keep the clock synced and do not restore a stage with its old timestamps. Packages above 200 MiB go up in parts with their MD5 stored on the object, so files above R2's 5 GiB single-request limit work and a promote can compare them.
+`sigmaos-mirror-upload-arm` uploads packages and signatures first, then the databases, then prunes what the stage no longer holds. It holds the stage lock throughout and refuses a stage whose last run was not `complete`, did not check signatures, or did not cover every repository in the tree. Databases are compared by checksum. Packages from the local stage are compared by time against the time R2 received its copy, which costs nothing beyond the listing; that would miss a same-name replacement stamped older than its upload, so keep the clock synced and do not restore a stage with its old timestamps. Packages above 200 MiB go up in parts with their MD5 stored on the object, so files above R2's 5 GiB single-request limit work and a promote can compare them.
 
 Each run stamps the whole mirror at `/lastsync`, as x86_64's is, beside each repository's own `aarch64/<repo>/lastsync`: the stager can be run for some repositories only, so it keeps freshness per repository, and the hourly job, which stages all four, gives the root [core]'s stamp. The stamps go up last, once every database they stand for is up.
 
-rc and stable are never synced from upstream. `omarchy-mirror-promote-arm` copies one bucket onto another, server-side and by checksum. It refuses an empty source, a destination it cannot list, refuses to serve a bucket's machines an older snapshot than they have (comparing `/lastsync`, or `aarch64/core/lastsync` in a bucket last published without one), and copies again if the source's databases changed while it ran. A first full copy is about 27,000 objects and takes a few minutes; later ones copy only what changed. Nothing runs it on a schedule:
+rc and stable are never synced from upstream. `sigmaos-mirror-promote-arm` copies one bucket onto another, server-side and by checksum. It refuses an empty source, a destination it cannot list, refuses to serve a bucket's machines an older snapshot than they have (comparing `/lastsync`, or `aarch64/core/lastsync` in a bucket last published without one), and copies again if the source's databases changed while it ran. A first full copy is about 27,000 objects and takes a few minutes; later ones copy only what changed. Nothing runs it on a schedule:
 
 ```sh
 # When a release candidate is cut
-bin/omarchy-mirror-promote-arm --from omarchy:omarchy-mirror-arm --to omarchy:omarchy-mirror-arm-rc
+bin/sigmaos-mirror-promote-arm --from omarchy:sigmaos-mirror-arm --to omarchy:sigmaos-mirror-arm-rc
 
 # On release day
-bin/omarchy-mirror-promote-arm --from omarchy:omarchy-mirror-arm-rc --to omarchy:omarchy-mirror-arm-stable
+bin/sigmaos-mirror-promote-arm --from omarchy:sigmaos-mirror-arm-rc --to omarchy:sigmaos-mirror-arm-stable
 ```
 
-`bin/setup-arm` installs the dependencies (a current rclone from rclone.org; the distribution's is years old), the pinned keyring and the hourly timer. R2 credentials come from `/etc/omarchy-mirror/r2.env` (mode 600) as `RCLONE_CONFIG_OMARCHY_*` variables; a token limited to the three ARM buckets also needs `RCLONE_CONFIG_OMARCHY_NO_CHECK_BUCKET=true`.
+`bin/setup-arm` installs the dependencies (a current rclone from rclone.org; the distribution's is years old), the pinned keyring and the hourly timer. R2 credentials come from `/etc/sigmaos-mirror/r2.env` (mode 600) as `RCLONE_CONFIG_OMARCHY_*` variables; a token limited to the three ARM buckets also needs `RCLONE_CONFIG_OMARCHY_NO_CHECK_BUCKET=true`.
 
 Cloudflare does not cache `.xz`, `.db`, `.files` or `.sig` by default, and every Arch Linux ARM package is a `.pkg.tar.xz`, so the three hosts need cache rules of their own: packages and signatures for a long time, databases for a minute. Both rules also need a status code TTL (400-499 for a minute, 500 and above not cached); without it a 404 for a file requested before it was uploaded stays cached long after the file exists.
 
