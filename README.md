@@ -129,3 +129,8 @@ python3 -m unittest discover -s tests -v
 CI runs Python 3.9 and 3.14 plus an Arch container with pacman. The pacman test queries a published fixture database using temporary configuration, database, cache, and keyring paths; it installs nothing and does not use the host package database. These tests cover the stager only, against a local fixture server.
 
 The published mirrors are checked separately by `.github/workflows/arm-mirror-check.yml`: every six hours, on an arm64 runner, pacman in an Arch Linux ARM container uses one of the three hosts and nothing else, with signatures required. It does a full upgrade, installs from `extra` and `aur`, and downloads the kernel.
+## Documentation
+
+Wiki documentation is available in the SigmaOS Wiki Staging repository:
+
+- [SigmaOS Wiki Staging](https://github.com/AaryanSinghChauhan09/sigmaos-wiki-staging#SigmaOS-mirror) - Full Wiki documentation for all SigmaOS components
