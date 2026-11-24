@@ -1,16 +1,16 @@
 # fk-omarchy-mirror
 
-> Forked from omacom/omarchy-mirror (MIT). See `SIGMAOS_FORK.md`.
+> Forked from AaryanSinghChauhan09/SigmaOS-mirror (MIT). See `SIGMAOS_FORK.md`.
 
-Dedicated mirror of Arch core/extra/multilib repositories for Omarchy hosted on Cloudflare R2.
+Dedicated mirror of Arch core/extra/multilib repositories for SigmaOS hosted on Cloudflare R2.
 
 ## Edge, rc and stable
 
-The stable mirror is the default for Omarchy. It's located at `https://stable-mirror.omarchy.org/`, and it serves the Arch snapshot the current Omarchy release was tested against. It changes only when a release ships, so new libraries and tools reach everyone after an rc has been tested on them.
+The stable mirror is the default for SigmaOS. It's located at `https://stable-mirror.omarchy.org/`, and it serves the Arch snapshot the current SigmaOS release was tested against. It changes only when a release ships, so new libraries and tools reach everyone after an rc has been tested on them.
 
 The rc mirror, `https://rc-mirror.omarchy.org/`, holds the snapshot taken when a release candidate is cut. Release candidates are tested against it.
 
-The edge mirror tracks the very latest Arch repositories every hour. It's located at `https://mirror.omarchy.org/`. Omarchy users can switch to this using _Update > Channel > Edge_ in the Omarchy Menu.
+The edge mirror tracks the very latest Arch repositories every hour. It's located at `https://mirror.omarchy.org/`. SigmaOS users can switch to this using _Update > Channel > Edge_ in the SigmaOS Menu.
 
 On the mirror host:
 
