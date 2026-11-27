@@ -4,8 +4,8 @@
 # edge to rc when a release candidate is cut, rc to stable on release day.
 # Both buckets are on the same R2 account, so the copies happen server-side.
 #
-#   sigma-mirror-promote-arm --from omarchy:sigma-mirror-arm --to omarchy:sigma-mirror-arm-rc
-#   sigma-mirror-promote-arm --from omarchy:sigma-mirror-arm-rc --to omarchy:sigma-mirror-arm-stable
+#   sigma-mirror-promote-arm --from sigmaos:sigma-mirror-arm --to sigmaos:sigma-mirror-arm-rc
+#   sigma-mirror-promote-arm --from sigmaos:sigma-mirror-arm-rc --to sigmaos:sigma-mirror-arm-stable
 
 set -euo pipefail
 

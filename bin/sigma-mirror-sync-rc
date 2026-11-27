@@ -1,4 +1,4 @@
 #!/bin/bash
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-"$SCRIPT_DIR/sigma-mirror-sync" --upstream "arch.mirror.constant.com/archlinux/" --stage "/mnt/arch-mirror-rc/" --r2 "omarchy:sigma-mirror-rc"
+"$SCRIPT_DIR/sigma-mirror-sync" --upstream "arch.mirror.constant.com/archlinux/" --stage "/mnt/sigma-mirror-rc/" --r2 "sigmaos:sigma-mirror-rc"

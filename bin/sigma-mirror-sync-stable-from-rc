@@ -10,4 +10,4 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-exec "$SCRIPT_DIR/sigma-mirror-copy-stage" --from /mnt/arch-mirror-rc/ --to /mnt/arch-mirror-stable/ --r2 omarchy:sigma-mirror-stable
+exec "$SCRIPT_DIR/sigma-mirror-copy-stage" --from /mnt/sigma-mirror-rc/ --to /mnt/sigma-mirror-stable/ --r2 sigmaos:sigma-mirror-stable
