@@ -128,7 +128,7 @@ def remote_url(upstream, relative):
 
 def request(url, timeout):
     return urlopen(Request(url, headers={
-        "User-Agent": "omarchy-mirror-stage-arm/1",
+        "User-Agent": "sigma-mirror-stage-arm/1",
         "Cache-Control": "no-cache",
     }), timeout=timeout)
 

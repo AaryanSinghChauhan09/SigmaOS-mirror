@@ -12,7 +12,7 @@ OCT_20 = 1792494243
 
 
 def rclone_env(root):
-    # An omarchy: remote on the local filesystem, and no rclone.conf of the
+    # An sigmaos: remote on the local filesystem, and no rclone.conf of the
     # machine's own.
     config = Path(root) / "rclone.conf"
     config.touch()
@@ -42,11 +42,11 @@ class PromoteArmTest(unittest.TestCase):
         return path
 
     def remote(self, path):
-        return f"omarchy:{path}"
+        return f"sigmaos:{path}"
 
     def promote(self, source, target):
         return subprocess.run(
-            [str(BIN / "omarchy-mirror-promote-arm"), "--from", self.remote(source), "--to", self.remote(target)],
+            [str(BIN / "sigma-mirror-promote-arm"), "--from", self.remote(source), "--to", self.remote(target)],
             capture_output=True,
             text=True,
             env=self.env,
@@ -134,13 +134,13 @@ class SyncArmTest(unittest.TestCase):
         self.root = Path(tempfile.mkdtemp())
         self.addCleanup(shutil.rmtree, self.root)
         (self.root / "bin").mkdir()
-        for script in ("omarchy-mirror-sync-arm", "omarchy-mirror-upload-arm"):
+        for script in ("sigma-mirror-sync-arm", "sigma-mirror-upload-arm"):
             shutil.copy(BIN / script, self.root / "bin")
         (self.root / "config").mkdir()
         (self.root / "config" / "arm-allow-null-records").write_text("")
         # The stager's part of a run: every repository staged with the run's
         # stamp, and the report upload-arm requires.
-        stager = self.root / "bin/omarchy-mirror-stage-arm"
+        stager = self.root / "bin/sigma-mirror-stage-arm"
         stager.write_text(
             "#!/bin/bash\n"
             'while [[ $# -gt 0 ]]; do [[ $1 == --stage ]] && stage=$2; shift; done\n'
@@ -173,7 +173,7 @@ class SyncArmTest(unittest.TestCase):
         )
         wrapper.chmod(0o755)
         result = subprocess.run(
-            [str(self.root / "bin/omarchy-mirror-sync-arm"), "--stage", f"{self.stage}/", "--r2", f"omarchy:{self.bucket}", "--keyring", "/dev/null"],
+            [str(self.root / "bin/sigma-mirror-sync-arm"), "--stage", f"{self.stage}/", "--r2", f"sigmaos:{self.bucket}", "--keyring", "/dev/null"],
             capture_output=True,
             text=True,
             env={**rclone_env(self.root), "PATH": f"{self.root}/bin:{os.environ['PATH']}"},

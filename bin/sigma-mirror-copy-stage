@@ -67,4 +67,4 @@ fi
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 rsync -a --delete "$FROM" "$TO"
-"$SCRIPT_DIR/omarchy-mirror-upload" --stage "$TO" --r2 "$R2"
+"$SCRIPT_DIR/sigma-mirror-upload" --stage "$TO" --r2 "$R2"

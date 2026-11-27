@@ -16,8 +16,8 @@ class CopyStageTest(unittest.TestCase):
         self.root = Path(tempfile.mkdtemp())
         self.addCleanup(shutil.rmtree, self.root)
         (self.root / "bin").mkdir()
-        shutil.copy(BIN / "omarchy-mirror-copy-stage", self.root / "bin")
-        upload = self.root / "bin/omarchy-mirror-upload"
+        shutil.copy(BIN / "sigma-mirror-copy-stage", self.root / "bin")
+        upload = self.root / "bin/sigma-mirror-upload"
         upload.write_text('#!/bin/bash\necho "$*" >> "$(dirname "$0")/../uploads"\n')
         upload.chmod(0o755)
 
@@ -34,7 +34,7 @@ class CopyStageTest(unittest.TestCase):
 
     def copy(self, source, target):
         return subprocess.run(
-            [str(self.root / "bin/omarchy-mirror-copy-stage"), "--from", f"{source}/", "--to", f"{target}/", "--r2", "omarchy:target"],
+            [str(self.root / "bin/sigma-mirror-copy-stage"), "--from", f"{source}/", "--to", f"{target}/", "--r2", "sigmaos:target"],
             capture_output=True,
             text=True,
         )
@@ -56,7 +56,7 @@ class CopyStageTest(unittest.TestCase):
         self.assertEqual((rc / "lastsync").read_text(), f"{STABLE_SYNC}\n")
         self.assertEqual((rc / "core/os/x86_64/core.db").read_text(), "stable database\n")
         self.assertEqual(self.packages(rc), ["glibc-2.43-2-x86_64.pkg.tar.zst"])
-        self.assertEqual(self.uploads(), [f"--stage {rc}/ --r2 omarchy:target"])
+        self.assertEqual(self.uploads(), [f"--stage {rc}/ --r2 sigmaos:target"])
 
     def test_copies_the_same_snapshot_again(self):
         rc = self.stage("rc", RC_SYNC, 1)
@@ -65,7 +65,7 @@ class CopyStageTest(unittest.TestCase):
         result = self.copy(rc, stable)
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(self.uploads(), [f"--stage {stable}/ --r2 omarchy:target"])
+        self.assertEqual(self.uploads(), [f"--stage {stable}/ --r2 sigmaos:target"])
 
     def test_never_moves_a_mirror_back_to_an_older_snapshot(self):
         rc = self.stage("rc", RC_SYNC, 1)
@@ -138,9 +138,9 @@ class CopyStageTest(unittest.TestCase):
         self.assertEqual((rc / "lastsync").read_text(), f"{STABLE_SYNC}\n")
 
     def test_the_release_day_copy_goes_from_rc_to_stable(self):
-        stable_from_rc = (BIN / "omarchy-mirror-sync-stable-from-rc").read_text()
+        stable_from_rc = (BIN / "sigma-mirror-sync-stable-from-rc").read_text()
 
-        self.assertIn("--from /mnt/arch-mirror-rc/ --to /mnt/arch-mirror-stable/ --r2 omarchy:omarchy-mirror-stable", stable_from_rc)
+        self.assertIn("--from /mnt/sigma-mirror-rc/ --to /mnt/sigma-mirror-stable/ --r2 sigmaos:sigma-mirror-stable", stable_from_rc)
 
     def test_nothing_stages_stable_from_upstream(self):
         # Stable only ever takes rc's snapshot; a sync from upstream is how it
@@ -149,7 +149,7 @@ class CopyStageTest(unittest.TestCase):
             if script.is_file():
                 text = script.read_text(errors="ignore")
                 self.assertFalse(
-                    "omarchy-mirror-sync" in text and '--stage "/mnt/arch-mirror-stable/"' in text,
+                    "sigma-mirror-sync" in text and '--stage "/mnt/sigma-mirror-stable/"' in text,
                     f"{script.name} stages stable from upstream",
                 )
 

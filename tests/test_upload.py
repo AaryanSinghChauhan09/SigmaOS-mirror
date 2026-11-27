@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 
-UPLOAD = Path(__file__).resolve().parents[1] / "bin/omarchy-mirror-upload"
+UPLOAD = Path(__file__).resolve().parents[1] / "bin/sigma-mirror-upload"
 
 
 class UploadTest(unittest.TestCase):
@@ -27,7 +27,7 @@ class UploadTest(unittest.TestCase):
         )
         rclone.chmod(0o755)
         return subprocess.run(
-            [str(UPLOAD), "--stage", f"{self.root}/stage/", "--r2", "omarchy:target"],
+            [str(UPLOAD), "--stage", f"{self.root}/stage/", "--r2", "sigmaos:target"],
             capture_output=True,
             text=True,
             env={"PATH": f"{self.root}/bin:/usr/bin:/bin"},

@@ -18,7 +18,7 @@ import unittest
 from unittest.mock import patch
 
 
-SCRIPT = Path(__file__).resolve().parents[1] / "bin/omarchy-mirror-stage-arm"
+SCRIPT = Path(__file__).resolve().parents[1] / "bin/sigma-mirror-stage-arm"
 API = runpy.run_path(str(SCRIPT))
 PREFIX = "/aarch64/core/"
 

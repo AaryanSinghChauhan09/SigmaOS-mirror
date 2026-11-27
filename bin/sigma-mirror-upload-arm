@@ -2,7 +2,7 @@
 
 # Upload a complete Arch Linux ARM stage to R2: packages first, then the
 # databases that name them, then prune. The same three steps copy one bucket
-# onto another (omarchy-mirror-promote-arm), where R2 copies server-side.
+# onto another (sigma-mirror-promote-arm), where R2 copies server-side.
 
 set -euo pipefail
 
@@ -79,7 +79,7 @@ COMMON=(--fast-list --s3-no-head --transfers=64 --checkers=64
 # The freshness stamps go up on their own, last: a stamp says which snapshot is
 # served, so it must not arrive while a database it stands for might still
 # fail. '**/lastsync' matches the repositories' stamps but not the mirror's own
-# at the root, which omarchy-release compares.
+# at the root, which sigmaos-release compares.
 INDEX=(--include '**/*.db' --include '**/*.db.*' --include '**/*.files' --include '**/*.files.*')
 STAMPS=(--include '**/lastsync' --include '/lastsync')
 NOT_INDEX=(--exclude '**/*.db' --exclude '**/*.db.*' --exclude '**/*.files' --exclude '**/*.files.*' --exclude '**/lastsync' --exclude '/lastsync')

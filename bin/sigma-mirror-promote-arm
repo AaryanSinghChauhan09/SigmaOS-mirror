@@ -4,8 +4,8 @@
 # edge to rc when a release candidate is cut, rc to stable on release day.
 # Both buckets are on the same R2 account, so the copies happen server-side.
 #
-#   omarchy-mirror-promote-arm --from omarchy:omarchy-mirror-arm --to omarchy:omarchy-mirror-arm-rc
-#   omarchy-mirror-promote-arm --from omarchy:omarchy-mirror-arm-rc --to omarchy:omarchy-mirror-arm-stable
+#   sigma-mirror-promote-arm --from omarchy:sigma-mirror-arm --to omarchy:sigma-mirror-arm-rc
+#   sigma-mirror-promote-arm --from omarchy:sigma-mirror-arm-rc --to omarchy:sigma-mirror-arm-stable
 
 set -euo pipefail
 
@@ -48,7 +48,7 @@ snapshot() {
 
 # Snapshots only move forward: a promote that would serve the destination's
 # machines an older snapshot than they have is refused, as on x86_64
-# (omarchy-mirror-copy-stage).
+# (sigma-mirror-copy-stage).
 if ! from_sync=$(snapshot "$FROM"); then
   echo "Refusing to promote $FROM: it has no readable lastsync" >&2
   exit 1
@@ -81,7 +81,7 @@ for attempt in 1 2 3; do
     exit 1
   fi
 
-  "$SCRIPT_DIR/omarchy-mirror-upload-arm" --stage "$FROM" --r2 "$TO"
+  "$SCRIPT_DIR/sigma-mirror-upload-arm" --stage "$FROM" --r2 "$TO"
 
   if [[ $(databases) == "$before" ]]; then
     echo "Promoted $FROM to $TO"

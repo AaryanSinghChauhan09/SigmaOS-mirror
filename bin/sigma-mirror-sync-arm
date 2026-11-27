@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # Stage Arch Linux ARM locally, with every package signature checked, then
-# upload the stage to R2. The ARM counterpart of omarchy-mirror-sync.
+# upload the stage to R2. The ARM counterpart of sigma-mirror-sync.
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 UPSTREAM="https://fl.us.mirror.archlinuxarm.org"
-KEYRING="/etc/omarchy-mirror/alarm-build.gpg"
+KEYRING="/etc/sigmaos-mirror/alarm-build.gpg"
 NULL_FILE="$SCRIPT_DIR/../config/arm-allow-null-records"
 VERBOSE=""
 
@@ -52,14 +52,14 @@ done <"$NULL_FILE"
 
 echo "Start syncing Omarchy ARM mirror"
 
-"$SCRIPT_DIR/omarchy-mirror-stage-arm" --stage "$STAGE" --upstream "$UPSTREAM" \
+"$SCRIPT_DIR/sigma-mirror-stage-arm" --stage "$STAGE" --upstream "$UPSTREAM" \
   --repos core extra alarm aur --workers 16 --prune --keyring "$KEYRING" \
   --recover-null-records --publish-degraded "${allow[@]}"
 # The snapshot the whole mirror now serves, at /lastsync as on x86_64's:
-# omarchy-release and omarchy-mirror-promote-arm compare it. Every repository
+# sigmaos-release and sigma-mirror-promote-arm compare it. Every repository
 # was staged by this run, so [core]'s stamp is all of theirs. The stager keeps
 # freshness per repository, since it can be run for some of them.
 cp "${STAGE%/}/aarch64/core/lastsync" "${STAGE%/}/lastsync"
-"$SCRIPT_DIR/omarchy-mirror-upload-arm" --stage "$STAGE" --r2 "$R2" ${VERBOSE:+--verbose}
+"$SCRIPT_DIR/sigma-mirror-upload-arm" --stage "$STAGE" --r2 "$R2" ${VERBOSE:+--verbose}
 
 echo "Finished syncing Omarchy ARM mirror in ${SECONDS}s"
