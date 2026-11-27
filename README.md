@@ -26,9 +26,9 @@ Snapshots only move forward, from upstream to rc to stable, and stable never syn
 
 Promote the mirror before the packages. `stable-mirror.sigmaos.org/lastsync` matches `rc-mirror.sigmaos.org/lastsync` once the copy is up, and only then should stable packages be promoted. Stable packages built against the new snapshot would otherwise reach machines that still get the old one.
 
-## Arch Linux ARM: local HTTP staging
+## Linux ARM: local HTTP staging
 
-Arch Linux ARM [pushes to its official mirrors](https://archlinuxarm.org/about/mirrors), but their public HTTP repositories can be pulled independently. `bin/sigmaos-mirror-stage-arm` stages packages locally using Python 3.9+ and its standard library. It defaults to the [Florida mirror](https://fl.us.mirror.archlinuxarm.org/) over HTTPS. It does not upload to R2, change existing mirror services, or register an official ARM mirror.
+Linux ARM [pushes to its official mirrors](https://archlinuxarm.org/about/mirrors), but their public HTTP repositories can be pulled independently. `bin/sigmaos-mirror-stage-arm` stages packages locally using Python 3.9+ and its standard library. It defaults to the [Florida mirror](https://fl.us.mirror.archlinuxarm.org/) over HTTPS. It does not upload to R2, change existing mirror services, or register an official ARM mirror.
 
 Start by checking the download size:
 
@@ -55,7 +55,7 @@ bin/sigmaos-mirror-stage-arm --stage /mnt/arch-arm-mirror \
 
 Use `--upstream https://another-mirror.example/path` to select another mirror root, `--workers` to change the default four concurrent downloads, and `--retries` / `--timeout` to tune requests. Paths retain ARM's layout: `aarch64/core/core.db`, `aarch64/core/<package>`, etc. The corresponding pacman mirror pattern is `Server = https://your-mirror.example/$arch/$repo`. The retired, empty `community` repository and installation images under `os/` are outside this package-mirror scope.
 
-The script reads each `.db` as the manifest: filename, compressed size, SHA-256, and embedded package signature. These are whole changed packages, not binary patches. It checks the size and SHA-256 of existing packages on every run, downloads missing or damaged packages to temporary files, and renames them into place after verification. Completed downloads survive a failed run; an interrupted individual download restarts on the next run. Detached `.sig` files are reproduced from the original signatures embedded in the database. The script preserves signatures; pacman verifies their authenticity using the Arch Linux ARM keyring. SHA-256 and signature preservation do not constitute cryptographic signature verification by this tool.
+The script reads each `.db` as the manifest: filename, compressed size, SHA-256, and embedded package signature. These are whole changed packages, not binary patches. It checks the size and SHA-256 of existing packages on every run, downloads missing or damaged packages to temporary files, and renames them into place after verification. Completed downloads survive a failed run; an interrupted individual download restarts on the next run. Detached `.sig` files are reproduced from the original signatures embedded in the database. The script preserves signatures; pacman verifies their authenticity using the Linux ARM keyring. SHA-256 and signature preservation do not constitute cryptographic signature verification by this tool.
 
 Before publishing local metadata, it checks shared `.files` entries against `.db`, finishes every manifest package, and re-fetches both databases and metadata signatures to detect upstream changes during the transfer. pacman installs from `.db` alone and reads `.files` only for `pacman -F`, so a package one lists and the other does not is reported and upstream's metadata is published unchanged, as every upstream mirror serves it: an older `.db` package absent from `.files` is still downloaded, and a `.files`-only record is not staged. A rolling update is caught when either database changes between the run's two fetches of it; a mismatched pair that holds still across both is published as upstream serves it, so until the next run `pacman -F` can name a package `pacman -S` cannot find. Malformed databases, conflicting metadata, missing manifest packages, and checksum failures stop the run without publishing new databases or advancing freshness. Rerun after a rolling update to reuse completed downloads. Successful syncs preserve `.db`, `.files`, `.tar.gz` aliases, and upstream database signatures as regular files.
 
@@ -99,8 +99,8 @@ The buckets keep ARM's layout, so the mirror line is `Server = https://arm-stabl
 
 Two options on the stager make it fit for unattended use:
 
-- `--keyring FILE` checks every package against a gpgv keyring before it is staged, using the signature the database carries. Arch Linux ARM signs every package with one build key (`68B3537F39A313B3E574D06777193F152BDBE6A6`) and does not sign its databases, so this is the only check that ties a package to its builder. A package that does not verify fails the run and is not retried. Verified packages are recorded by content and keyring beside the stage (`STAGE.verified.json`), so a package staged before the keyring was given, or under another keyring, is checked on the next run and an unchanged one is not checked twice.
-- `--publish-degraded` publishes upstream's databases unchanged when `--recover-null-records` was needed. The all-NUL record described above has been in `extra` since at least September 5, 2026, and every Arch Linux ARM mirror serves it; without this option the stage could never publish `extra`. The exception stays explicit: `config/arm-allow-null-records` lists the known records, and a new one fails the run until it is added.
+- `--keyring FILE` checks every package against a gpgv keyring before it is staged, using the signature the database carries. Linux ARM signs every package with one build key (`68B3537F39A313B3E574D06777193F152BDBE6A6`) and does not sign its databases, so this is the only check that ties a package to its builder. A package that does not verify fails the run and is not retried. Verified packages are recorded by content and keyring beside the stage (`STAGE.verified.json`), so a package staged before the keyring was given, or under another keyring, is checked on the next run and an unchanged one is not checked twice.
+- `--publish-degraded` publishes upstream's databases unchanged when `--recover-null-records` was needed. The all-NUL record described above has been in `extra` since at least September 5, 2026, and every Linux ARM mirror serves it; without this option the stage could never publish `extra`. The exception stays explicit: `config/arm-allow-null-records` lists the known records, and a new one fails the run until it is added.
 
 `sigmaos-mirror-upload-arm` uploads packages and signatures first, then the databases, then prunes what the stage no longer holds. It holds the stage lock throughout and refuses a stage whose last run was not `complete`, did not check signatures, or did not cover every repository in the tree. Databases are compared by checksum. Packages from the local stage are compared by time against the time R2 received its copy, which costs nothing beyond the listing; that would miss a same-name replacement stamped older than its upload, so keep the clock synced and do not restore a stage with its old timestamps. Packages above 200 MiB go up in parts with their MD5 stored on the object, so files above R2's 5 GiB single-request limit work and a promote can compare them.
 
@@ -110,15 +110,15 @@ rc and stable are never synced from upstream. `sigmaos-mirror-promote-arm` copie
 
 ```sh
 # When a release candidate is cut
-bin/sigmaos-mirror-promote-arm --from omarchy:sigmaos-mirror-arm --to omarchy:sigmaos-mirror-arm-rc
+bin/sigmaos-mirror-promote-arm --from sigmaos:sigmaos-mirror-arm --to sigmaos:sigmaos-mirror-arm-rc
 
 # On release day
-bin/sigmaos-mirror-promote-arm --from omarchy:sigmaos-mirror-arm-rc --to omarchy:sigmaos-mirror-arm-stable
+bin/sigmaos-mirror-promote-arm --from sigmaos:sigmaos-mirror-arm-rc --to sigmaos:sigmaos-mirror-arm-stable
 ```
 
-`bin/setup-arm` installs the dependencies (a current rclone from rclone.org; the distribution's is years old), the pinned keyring and the hourly timer. R2 credentials come from `/etc/sigmaos-mirror/r2.env` (mode 600) as `RCLONE_CONFIG_OMARCHY_*` variables; a token limited to the three ARM buckets also needs `RCLONE_CONFIG_OMARCHY_NO_CHECK_BUCKET=true`.
+`bin/setup-arm` installs the dependencies (a current rclone from rclone.org; the distribution's is years old), the pinned keyring and the hourly timer. R2 credentials come from `/etc/sigmaos-mirror/r2.env` (mode 600) as `RCLONE_CONFIG_SIGMAOS_*` variables; a token limited to the three ARM buckets also needs `RCLONE_CONFIG_SIGMAOS_NO_CHECK_BUCKET=true`.
 
-Cloudflare does not cache `.xz`, `.db`, `.files` or `.sig` by default, and every Arch Linux ARM package is a `.pkg.tar.xz`, so the three hosts need cache rules of their own: packages and signatures for a long time, databases for a minute. Both rules also need a status code TTL (400-499 for a minute, 500 and above not cached); without it a 404 for a file requested before it was uploaded stays cached long after the file exists.
+Cloudflare does not cache `.xz`, `.db`, `.files` or `.sig` by default, and every Linux ARM package is a `.pkg.tar.xz`, so the three hosts need cache rules of their own: packages and signatures for a long time, databases for a minute. Both rules also need a status code TTL (400-499 for a minute, 500 and above not cached); without it a 404 for a file requested before it was uploaded stays cached long after the file exists.
 
 Run the integration tests without network access to public mirrors:
 
@@ -128,7 +128,7 @@ python3 -m unittest discover -s tests -v
 
 CI runs Python 3.9 and 3.14 plus an Arch container with pacman. The pacman test queries a published fixture database using temporary configuration, database, cache, and keyring paths; it installs nothing and does not use the host package database. These tests cover the stager only, against a local fixture server.
 
-The published mirrors are checked separately by `.github/workflows/arm-mirror-check.yml`: every six hours, on an arm64 runner, pacman in an Arch Linux ARM container uses one of the three hosts and nothing else, with signatures required. It does a full upgrade, installs from `extra` and `aur`, and downloads the kernel.
+The published mirrors are checked separately by `.github/workflows/arm-mirror-check.yml`: every six hours, on an arm64 runner, pacman in an Linux ARM container uses one of the three hosts and nothing else, with signatures required. It does a full upgrade, installs from `extra` and `aur`, and downloads the kernel.
 ## Documentation
 
 Wiki documentation is available in the SigmaOS Wiki Staging repository:
